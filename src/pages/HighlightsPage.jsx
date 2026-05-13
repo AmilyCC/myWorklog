@@ -34,7 +34,20 @@ export default function HighlightsPage() {
     setLoading(true)
     setError('')
     loadHighlights()
-      .then(md => setHighlights(parseHighlightsMd(md)))
+      .then(md => {
+        const parsed = parseHighlightsMd(md)
+        setHighlights(parsed)
+        // 自動新增亮點裡出現過但清單沒有的分類
+        setCategories(prev => {
+          const newCats = [...new Set(
+            parsed.map(h => h.category).filter(c => c && c !== '其他' && !prev.includes(c))
+          )]
+          if (newCats.length === 0) return prev
+          const updated = [...prev, ...newCats]
+          localStorage.setItem(CAT_STORAGE_KEY, JSON.stringify(updated))
+          return updated
+        })
+      })
       .catch(e => setError(`載入失敗：${e.message}`))
       .finally(() => setLoading(false))
   }, [loadHighlights])
