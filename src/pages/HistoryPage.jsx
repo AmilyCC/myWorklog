@@ -1,8 +1,21 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useDrive } from '../hooks/useDrive'
-import { dateFromFilename, parseJournalMd, buildJournalMd, toDateStr } from '../utils/journalUtils'
+import { dateFromFilename, parseJournalMd, toDateStr } from '../utils/journalUtils'
 
-function Calendar({ year, month, markedDates, selected, onSelect, onNav }) {
+function newJournalTemplate(date) {
+  return `# 工作日誌 ${date}
+
+## 今日工作紀錄
+-
+
+## 履歷亮點故事
+
+
+## 關鍵字標籤
+`
+}
+
+function Calendar({ year, month, markedDates, selected, onSelect, onYearMonth }) {
   const firstDay = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const today = toDateStr()
@@ -13,13 +26,26 @@ function Calendar({ year, month, markedDates, selected, onSelect, onNav }) {
   const fmt = (d) => `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
   const DAYS = ['日', '一', '二', '三', '四', '五', '六']
   const MONTHS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
+  const currentYear = new Date().getFullYear()
+  const years = Array.from({ length: currentYear - 2020 + 2 }, (_, i) => 2020 + i)
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-4">
-      <div className="flex items-center justify-between mb-4">
-        <button onClick={() => onNav(-1)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600">‹</button>
-        <span className="font-semibold text-slate-700">{year} 年 {MONTHS[month]}</span>
-        <button onClick={() => onNav(1)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-600">›</button>
+      <div className="flex items-center gap-2 mb-4">
+        <select
+          value={year}
+          onChange={e => onYearMonth(Number(e.target.value), month)}
+          className="flex-1 text-sm border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+        >
+          {years.map(y => <option key={y} value={y}>{y} 年</option>)}
+        </select>
+        <select
+          value={month}
+          onChange={e => onYearMonth(year, Number(e.target.value))}
+          className="flex-1 text-sm border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+        >
+          {MONTHS.map((m, i) => <option key={i} value={i}>{m}</option>)}
+        </select>
       </div>
       <div className="grid grid-cols-7 gap-1 mb-1">
         {DAYS.map(d => <div key={d} className="text-center text-xs text-slate-400 py-1">{d}</div>)}
@@ -67,6 +93,11 @@ export default function HistoryPage() {
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
+  // 新增日誌
+  const [creating, setCreating] = useState(false)
+  const [newDate, setNewDate] = useState(toDateStr())
+  const [newMd, setNewMd] = useState('')
+
   const markedDates = new Set(files.map(f => dateFromFilename(f.name)))
 
   const refresh = useCallback(() => {
@@ -75,8 +106,40 @@ export default function HistoryPage() {
 
   useEffect(() => { refresh() }, [refresh])
 
+  function startCreating() {
+    const today = toDateStr()
+    setNewDate(today)
+    setNewMd(newJournalTemplate(today))
+    setCreating(true)
+    setSelected(null)
+    setContent(null)
+    setEditing(false)
+  }
+
+  function handleNewDateChange(date) {
+    setNewDate(date)
+    setNewMd(newJournalTemplate(date))
+  }
+
+  async function handleCreate() {
+    if (!newDate || !newMd.trim()) return
+    if (markedDates.has(newDate) && !confirm(`${newDate} 已有日誌，確定要覆蓋？`)) return
+    setSaving(true)
+    try {
+      await saveJournal(newDate, newMd)
+      await syncJournalHighlights(newDate, newMd)
+      await refresh()
+      setCreating(false)
+      setSelected(newDate)
+      setContent(newMd)
+      setParsed(parseJournalMd(newMd))
+    } catch (e) { alert('儲存失敗：' + e.message) }
+    finally { setSaving(false) }
+  }
+
   async function selectDate(date) {
     setSelected(date)
+    setCreating(false)
     setEditing(false)
     setLoading(true)
     try {
@@ -112,17 +175,18 @@ export default function HistoryPage() {
     finally { setDeleting(false) }
   }
 
-  function navMonth(dir) {
-    const d = new Date(year, month + dir, 1)
-    setYear(d.getFullYear())
-    setMonth(d.getMonth())
-  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6">
       {/* Left: Calendar + file list */}
       <div className="space-y-4">
-        <Calendar year={year} month={month} markedDates={markedDates} selected={selected} onSelect={selectDate} onNav={navMonth} />
+        <button
+          onClick={startCreating}
+          className="w-full py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition"
+        >
+          + 新增日誌
+        </button>
+        <Calendar year={year} month={month} markedDates={markedDates} selected={selected} onSelect={selectDate} onYearMonth={(y, m) => { setYear(y); setMonth(m) }} />
         <div className="space-y-1">
           <p className="text-xs text-slate-400 px-1">最近記錄</p>
           {files.slice(0, 10).map(f => {
@@ -138,15 +202,54 @@ export default function HistoryPage() {
         </div>
       </div>
 
-      {/* Right: Journal viewer/editor */}
+      {/* Right panel */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5 min-h-64">
-        {!selected && (
-          <div className="flex items-center justify-center h-48 text-slate-400 text-sm">點擊日曆上有記錄的日期查看</div>
+
+        {/* 新增模式 */}
+        {creating && (
+          <>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-slate-800">新增日誌</h2>
+              <div className="flex gap-2">
+                <button onClick={handleCreate} disabled={saving}
+                  className="text-sm px-3 py-1 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">
+                  {saving ? '儲存中...' : '儲存'}
+                </button>
+                <button onClick={() => setCreating(false)}
+                  className="text-sm px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600">取消</button>
+              </div>
+            </div>
+            <div className="mb-3">
+              <label className="text-xs text-slate-500 block mb-1">日期</label>
+              <input
+                type="date"
+                value={newDate}
+                onChange={e => handleNewDateChange(e.target.value)}
+                className="text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              />
+            </div>
+            <textarea
+              value={newMd}
+              onChange={e => setNewMd(e.target.value)}
+              className="w-full h-80 text-sm font-mono border border-slate-200 rounded-xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            />
+          </>
         )}
-        {selected && loading && (
+
+        {/* 空狀態 */}
+        {!creating && !selected && (
+          <div className="flex items-center justify-center h-48 text-slate-400 text-sm">
+            點擊日曆上有記錄的日期查看，或按「+ 新增日誌」
+          </div>
+        )}
+
+        {/* 載入中 */}
+        {!creating && selected && loading && (
           <div className="flex items-center justify-center h-48 text-slate-400 text-sm">載入中...</div>
         )}
-        {selected && !loading && content && (
+
+        {/* 檢視 / 編輯模式 */}
+        {!creating && selected && !loading && content && (
           <>
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold text-slate-800">📅 {selected}</h2>

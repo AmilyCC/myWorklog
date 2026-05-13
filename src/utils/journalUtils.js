@@ -6,6 +6,20 @@ export const journalFilename = (date) => `工作日誌_${date}.md`
 
 export const dateFromFilename = (name) => name.replace('工作日誌_', '').replace('.md', '')
 
+// YYYY-MM-DD → YYYY年M月D日
+export function toChineseDate(dateStr) {
+  if (!dateStr) return ''
+  const [y, m, d] = dateStr.split('-')
+  return `${y}年${parseInt(m)}月${parseInt(d)}日`
+}
+
+// YYYY年M月D日 → YYYY-MM-DD
+export function fromChineseDate(cnDate) {
+  const m = cnDate.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/)
+  if (!m) return cnDate
+  return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`
+}
+
 export function parseRelativeDate(text) {
   const t = text.trim()
   if (t === '今天') return toDateStr()
@@ -19,7 +33,7 @@ export function parseRelativeDate(text) {
   const m = t.match(/(\d{1,2})\/(\d{1,2})/)
   if (m) {
     const year = new Date().getFullYear()
-    return `${year}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`
+    return `${year}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`
   }
   return null
 }
@@ -61,7 +75,12 @@ export function parseJournalMd(content) {
     }
     if (section === 'highlights' && line.startsWith('- ')) {
       const m = line.match(/問題：(.+?)\s*\|\s*解法：(.+?)\s*\|\s*成效：(.+?)(?:\s*\[分類:(.+?)\])?$/)
-      if (m) result.highlights.push({ problem: m[1].trim(), solution: m[2].trim(), result: m[3].trim(), category: m[4]?.trim() || '其他' })
+      if (m) result.highlights.push({
+        problem: m[1].trim(),
+        solution: m[2].trim(),
+        result: m[3].trim(),
+        category: m[4]?.trim() || '其他',
+      })
     }
     if (section === 'tags' && line.trim()) {
       result.tags = line.split('、').map(t => t.trim()).filter(Boolean)
@@ -71,23 +90,17 @@ export function parseJournalMd(content) {
   return result
 }
 
+// 亮點匯整.md 格式：每筆亮點一個 ## 分類 block，用 --- 分隔
 export function buildHighlightsMd(allHighlights) {
-  let md = '# 亮點匯整\n\n'
-  const grouped = Object.fromEntries(HIGHLIGHT_CATEGORIES.map(c => [c, []]))
-
+  if (!allHighlights.length) return '# 亮點彙整\n'
+  let md = '# 亮點彙整\n\n'
   for (const h of allHighlights) {
-    const cat = h.category || '其他'
-    if (!grouped[cat]) grouped[cat] = []
-    grouped[cat].push(h)
-  }
-
-  for (const [cat, items] of Object.entries(grouped)) {
-    if (!items.length) continue
-    md += `## ${cat}\n`
-    items.forEach(h => {
-      md += `- 問題：${h.problem} | 解法：${h.solution} | 成效：${h.result} [日期:${h.date}]\n`
-    })
-    md += '\n'
+    md += `## ${h.category || '其他'}\n`
+    md += `日期：${toChineseDate(h.date)}\n`
+    md += `問題：${h.problem}\n`
+    md += `解法：${h.solution}\n`
+    md += `成效：${h.result}\n`
+    md += `---\n`
   }
   return md
 }
@@ -95,14 +108,26 @@ export function buildHighlightsMd(allHighlights) {
 export function parseHighlightsMd(content) {
   if (!content) return []
   const highlights = []
-  let currentCat = ''
-  for (const line of content.split('\n')) {
-    if (line.startsWith('## ')) { currentCat = line.slice(3).trim(); continue }
-    if (line.startsWith('- ')) {
-      const m = line.match(/問題：(.+?)\s*\|\s*解法：(.+?)\s*\|\s*成效：(.+?)\s*\[日期:(.+?)\]/)
-      if (m) highlights.push({ problem: m[1].trim(), solution: m[2].trim(), result: m[3].trim(), date: m[4].trim(), category: currentCat })
+  const lines = content.split('\n')
+  let current = null
+
+  for (const line of lines) {
+    const t = line.trim()
+    if (t.startsWith('## ')) {
+      if (current?.problem) highlights.push(current)
+      current = { category: t.slice(3).trim(), date: '', problem: '', solution: '', result: '' }
+    } else if (current) {
+      if (t.startsWith('日期：')) current.date = fromChineseDate(t.slice(3))
+      else if (t.startsWith('問題：')) current.problem = t.slice(3)
+      else if (t.startsWith('解法：')) current.solution = t.slice(3)
+      else if (t.startsWith('成效：')) current.result = t.slice(3)
+      else if (t === '---') {
+        if (current?.problem) highlights.push(current)
+        current = null
+      }
     }
   }
+  if (current?.problem) highlights.push(current)
   return highlights
 }
 

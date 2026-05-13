@@ -1,8 +1,7 @@
 import { useAuth } from '../contexts/AuthContext'
 
 const TABS = [
-  { id: 'assistant', label: '🤖 助手', desc: '對話記錄' },
-  { id: 'history',   label: '📅 歷史', desc: '行事曆' },
+  { id: 'history',    label: '📅 歷史', desc: '行事曆' },
   { id: 'highlights', label: '⭐ 亮點', desc: '履歷素材' },
 ]
 
