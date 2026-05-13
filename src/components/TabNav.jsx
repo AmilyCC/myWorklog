@@ -1,8 +1,8 @@
 import { useAuth } from '../contexts/AuthContext'
 
 const TABS = [
-  { id: 'history',    label: '📅 歷史', desc: '行事曆' },
-  { id: 'highlights', label: '⭐ 亮點', desc: '履歷素材' },
+  { id: 'history',    label: '📅 歷史' },
+  { id: 'highlights', label: '⭐ 亮點' },
 ]
 
 export default function TabNav({ active, setActive }) {
@@ -14,19 +14,19 @@ export default function TabNav({ active, setActive }) {
         <div className="flex items-center gap-3">
           <img src="/logo.png" alt="logo" className="w-7 h-7 object-contain" />
           <div className="flex gap-1">
-          {TABS.map(t => (
-            <button
-              key={t.id}
-              onClick={() => setActive(t.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                active === t.id
-                  ? 'bg-indigo-50 text-indigo-700'
-                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
+            {TABS.map(t => (
+              <button
+                key={t.id}
+                onClick={() => setActive(t.id)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                  active === t.id
+                    ? 'bg-primary-50 text-primary-600'
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
           </div>
         </div>
         {user && (

@@ -150,7 +150,7 @@ export default function HighlightsPage() {
           <span className="text-sm text-slate-400">{highlights.length} 筆</span>
           <button
             onClick={() => setShowCatMgr(v => !v)}
-            className={`text-sm px-3 py-1.5 rounded-lg transition ${showCatMgr ? 'bg-indigo-100 text-indigo-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+            className={`text-sm px-3 py-1.5 rounded-lg transition ${showCatMgr ? 'bg-primary-100 text-primary-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
           >
             管理分類
           </button>
@@ -185,12 +185,12 @@ export default function HighlightsPage() {
               onChange={e => setNewCat(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && addCategory()}
               placeholder="新增分類名稱..."
-              className="flex-1 text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              className="flex-1 text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-300"
             />
             <button
               onClick={addCategory}
               disabled={!newCat.trim()}
-              className="text-sm px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-40"
+              className="text-sm px-4 py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 disabled:opacity-40"
             >新增</button>
           </div>
         </div>
@@ -207,7 +207,7 @@ export default function HighlightsPage() {
 
       {/* 錯誤 */}
       {error && (
-        <div className="text-sm px-4 py-3 rounded-xl bg-red-50 text-red-700">
+        <div className="text-sm px-4 py-3 rounded-xl bg-accent-50 text-accent-700">
           {error}
           <button onClick={load} className="ml-3 underline">重試</button>
         </div>
@@ -218,7 +218,7 @@ export default function HighlightsPage() {
         value={search}
         onChange={e => setSearch(e.target.value)}
         placeholder="搜尋問題、解法、成效..."
-        className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+        className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-300"
       />
 
       {/* 分類 tabs */}
@@ -229,7 +229,7 @@ export default function HighlightsPage() {
             onClick={() => setActiveCategory(c)}
             className={`px-3 py-1.5 rounded-full text-sm transition ${
               activeCategory === c
-                ? 'bg-indigo-600 text-white'
+                ? 'bg-primary-600 text-white'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
@@ -283,12 +283,12 @@ export default function HighlightsPage() {
                         value={editForm[field]}
                         onChange={e => setEditForm(p => ({ ...p, [field]: e.target.value }))}
                         rows={2}
-                        className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                        className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary-300"
                       />
                     </div>
                   ))}
                   <div className="flex gap-2">
-                    <button onClick={() => saveEdit(i)} className="flex-1 bg-indigo-600 text-white rounded-xl py-2 text-sm hover:bg-indigo-700">儲存</button>
+                    <button onClick={() => saveEdit(i)} className="flex-1 bg-primary-600 text-white rounded-xl py-2 text-sm hover:bg-primary-700">儲存</button>
                     <button onClick={() => setEditingId(null)} className="flex-1 bg-slate-100 text-slate-600 rounded-xl py-2 text-sm hover:bg-slate-200">取消</button>
                   </div>
                 </div>
@@ -301,13 +301,13 @@ export default function HighlightsPage() {
                     <span className="text-xs text-slate-400">{h.date}</span>
                   </div>
                   <div className="space-y-2 text-sm">
-                    <p><span className="font-semibold text-red-600">問題：</span><span className="text-slate-700">{h.problem}</span></p>
-                    <p><span className="font-semibold text-blue-600">解法：</span><span className="text-slate-700">{h.solution}</span></p>
+                    <p><span className="font-semibold text-accent-600">問題：</span><span className="text-slate-700">{h.problem}</span></p>
+                    <p><span className="font-semibold text-primary-600">解法：</span><span className="text-slate-700">{h.solution}</span></p>
                     <p><span className="font-semibold text-green-600">成效：</span><span className="text-slate-700">{h.result}</span></p>
                   </div>
                   <div className="flex gap-2 mt-4">
                     <button onClick={() => startEdit(i, h)} className="text-xs px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg">編輯</button>
-                    <button onClick={() => deleteHighlight(i)} className="text-xs px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg">刪除</button>
+                    <button onClick={() => deleteHighlight(i)} className="text-xs px-3 py-1.5 bg-red-50 hover:bg-red-100 text-accent-600 rounded-lg">刪除</button>
                   </div>
                 </>
               )}

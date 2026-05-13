@@ -4,16 +4,16 @@ export default function LoginPage() {
   const { login, authError } = useAuth()
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-slate-100">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-slate-100">
       <div className="bg-white rounded-2xl shadow-lg p-10 flex flex-col items-center gap-6 w-80">
         <img src="/logo.png" alt="logo" className="w-20 h-20 object-contain" />
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-slate-800">PM 工作日誌</h1>
-          <p className="text-slate-500 text-sm mt-1">記錄每天的工作成果</p>
+          <h1 className="text-xl font-bold text-slate-800">Amily エミリー的工作日誌</h1>
+          <p className="text-slate-400 text-sm mt-1">記錄每天的工作成果</p>
         </div>
         <button
           onClick={login}
-          className="w-full flex items-center justify-center gap-3 bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-700 font-medium hover:bg-slate-50 hover:border-slate-400 transition shadow-sm"
+          className="w-full flex items-center justify-center gap-3 bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-700 font-medium hover:bg-primary-50 hover:border-primary-300 transition shadow-sm"
         >
           <svg width="20" height="20" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -24,7 +24,7 @@ export default function LoginPage() {
           使用 Google 帳號登入
         </button>
         {authError && (
-          <p className="text-xs text-red-500 text-center bg-red-50 px-3 py-2 rounded-lg w-full break-all">
+          <p className="text-xs text-accent-600 text-center bg-accent-50 px-3 py-2 rounded-lg w-full break-all">
             錯誤：{authError}
           </p>
         )}
