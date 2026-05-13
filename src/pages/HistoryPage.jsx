@@ -31,7 +31,7 @@ function Calendar({ year, month, markedDates, selected, onSelect, onYearMonth })
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-4">
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-3">
         <select
           value={year}
           onChange={e => onYearMonth(Number(e.target.value), month)}
@@ -63,7 +63,7 @@ function Calendar({ year, month, markedDates, selected, onSelect, onYearMonth })
               onClick={() => hasEntry && onSelect(dateStr)}
               className={`aspect-square rounded-lg text-sm flex flex-col items-center justify-center transition
                 ${isSelected ? 'bg-indigo-600 text-white' : ''}
-                ${!isSelected && hasEntry ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 cursor-pointer' : ''}
+                ${!isSelected && hasEntry ? 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 cursor-pointer font-medium' : ''}
                 ${!isSelected && !hasEntry ? 'text-slate-300 cursor-default' : ''}
                 ${isToday && !isSelected ? 'ring-2 ring-indigo-400' : ''}
               `}
@@ -78,25 +78,90 @@ function Calendar({ year, month, markedDates, selected, onSelect, onYearMonth })
   )
 }
 
+function JournalViewer({ parsed }) {
+  return (
+    <div className="space-y-5">
+      {parsed?.entries.length > 0 && (
+        <div className="bg-blue-50 rounded-xl p-4 border-l-4 border-blue-400">
+          <p className="text-xs font-semibold text-blue-600 tracking-wide mb-3">今日工作紀錄</p>
+          <ul className="space-y-2">
+            {parsed.entries.map((e, i) => (
+              <li key={i} className="flex gap-2 text-sm text-slate-700 leading-relaxed">
+                <span className="text-blue-400 shrink-0 mt-0.5">▸</span>
+                <span>{e}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {parsed?.highlights.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-amber-600 tracking-wide mb-3">⭐ 履歷亮點</p>
+          <div className="space-y-3">
+            {parsed.highlights.map((h, i) => (
+              <div key={i} className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                <span className="inline-block mb-3 text-xs bg-amber-200 text-amber-800 px-2.5 py-0.5 rounded-full font-medium">
+                  {h.category || '未分類'}
+                </span>
+                <div className="space-y-1.5 text-sm">
+                  <p className="leading-relaxed">
+                    <span className="font-semibold text-red-500">問題</span>
+                    <span className="text-slate-300 mx-1.5">|</span>
+                    <span className="text-slate-700">{h.problem}</span>
+                  </p>
+                  <p className="leading-relaxed">
+                    <span className="font-semibold text-blue-500">解法</span>
+                    <span className="text-slate-300 mx-1.5">|</span>
+                    <span className="text-slate-700">{h.solution}</span>
+                  </p>
+                  <p className="leading-relaxed">
+                    <span className="font-semibold text-green-500">成效</span>
+                    <span className="text-slate-300 mx-1.5">|</span>
+                    <span className="text-slate-700">{h.result}</span>
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {parsed?.tags.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-slate-400 tracking-wide mb-2">關鍵字</p>
+          <div className="flex flex-wrap gap-1.5">
+            {parsed.tags.map(t => (
+              <span key={t} className="text-xs bg-indigo-50 text-indigo-600 border border-indigo-200 px-3 py-1 rounded-full">
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function HistoryPage() {
   const { listJournals, loadJournal, saveJournal, deleteJournal, syncJournalHighlights } = useDrive()
   const now = new Date()
-  const [year, setYear] = useState(now.getFullYear())
-  const [month, setMonth] = useState(now.getMonth())
-  const [files, setFiles] = useState([])
+  const [year, setYear]       = useState(now.getFullYear())
+  const [month, setMonth]     = useState(now.getMonth())
+  const [files, setFiles]     = useState([])
   const [selected, setSelected] = useState(null)
   const [content, setContent] = useState(null)
-  const [parsed, setParsed] = useState(null)
+  const [parsed, setParsed]   = useState(null)
   const [editing, setEditing] = useState(false)
-  const [editMd, setEditMd] = useState('')
+  const [editMd, setEditMd]   = useState('')
   const [loading, setLoading] = useState(false)
-  const [saving, setSaving] = useState(false)
+  const [saving, setSaving]   = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [calOpen, setCalOpen] = useState(false)  // 手機用
 
-  // 新增日誌
   const [creating, setCreating] = useState(false)
-  const [newDate, setNewDate] = useState(toDateStr())
-  const [newMd, setNewMd] = useState('')
+  const [newDate, setNewDate]   = useState(toDateStr())
+  const [newMd, setNewMd]       = useState('')
 
   const markedDates = new Set(files.map(f => dateFromFilename(f.name)))
 
@@ -142,6 +207,7 @@ export default function HistoryPage() {
     setCreating(false)
     setEditing(false)
     setLoading(true)
+    setCalOpen(false)  // 手機選完日期自動收起日曆
     try {
       const md = await loadJournal(date)
       setContent(md)
@@ -175,148 +241,144 @@ export default function HistoryPage() {
     finally { setDeleting(false) }
   }
 
-
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6">
-      {/* Left: Calendar + file list */}
-      <div className="space-y-4">
+
+      {/* 左欄 */}
+      <div className="space-y-3">
         <button
           onClick={startCreating}
-          className="w-full py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition"
+          className="w-full py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition"
         >
           + 新增日誌
         </button>
-        <Calendar year={year} month={month} markedDates={markedDates} selected={selected} onSelect={selectDate} onYearMonth={(y, m) => { setYear(y); setMonth(m) }} />
-        <div className="space-y-1">
-          <p className="text-xs text-slate-400 px-1">最近記錄</p>
+
+        {/* 手機：日曆開合按鈕 */}
+        <button
+          onClick={() => setCalOpen(v => !v)}
+          className="md:hidden w-full flex items-center justify-between px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-600"
+        >
+          <span>📅 {year} 年 {month + 1} 月</span>
+          <span className="text-slate-400">{calOpen ? '▲' : '▼'}</span>
+        </button>
+
+        {/* 日曆：手機收合，桌機常駐 */}
+        <div className={`${calOpen ? 'block' : 'hidden'} md:block`}>
+          <Calendar
+            year={year} month={month}
+            markedDates={markedDates} selected={selected}
+            onSelect={selectDate}
+            onYearMonth={(y, m) => { setYear(y); setMonth(m) }}
+          />
+        </div>
+
+        {/* 最近記錄 */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-3 space-y-1">
+          <p className="text-xs text-slate-400 px-1 pb-1">最近記錄</p>
           {files.slice(0, 10).map(f => {
             const date = dateFromFilename(f.name)
             return (
               <button key={f.id} onClick={() => selectDate(date)}
-                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition ${selected === date ? 'bg-indigo-50 text-indigo-700 font-medium' : 'hover:bg-slate-100 text-slate-600'}`}>
-                {date}
+                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition flex items-center justify-between ${
+                  selected === date
+                    ? 'bg-indigo-50 text-indigo-700 font-semibold'
+                    : 'hover:bg-slate-50 text-slate-600'
+                }`}>
+                <span>{date}</span>
+                {selected === date && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />}
               </button>
             )
           })}
-          {files.length === 0 && <p className="text-sm text-slate-400 px-1">尚無日誌記錄</p>}
+          {files.length === 0 && <p className="text-sm text-slate-400 px-1 py-2">尚無日誌記錄</p>}
         </div>
       </div>
 
-      {/* Right panel */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-5 min-h-64">
+      {/* 右欄 */}
+      <div className="bg-white rounded-2xl border border-slate-200 min-h-64 overflow-hidden">
 
         {/* 新增模式 */}
         {creating && (
-          <>
+          <div className="p-5">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold text-slate-800">新增日誌</h2>
               <div className="flex gap-2">
                 <button onClick={handleCreate} disabled={saving}
-                  className="text-sm px-3 py-1 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">
+                  className="text-sm px-4 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">
                   {saving ? '儲存中...' : '儲存'}
                 </button>
                 <button onClick={() => setCreating(false)}
-                  className="text-sm px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600">取消</button>
+                  className="text-sm px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600">取消</button>
               </div>
             </div>
             <div className="mb-3">
               <label className="text-xs text-slate-500 block mb-1">日期</label>
               <input
-                type="date"
-                value={newDate}
+                type="date" value={newDate}
                 onChange={e => handleNewDateChange(e.target.value)}
                 className="text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
               />
             </div>
             <textarea
-              value={newMd}
-              onChange={e => setNewMd(e.target.value)}
+              value={newMd} onChange={e => setNewMd(e.target.value)}
               className="w-full h-80 text-sm font-mono border border-slate-200 rounded-xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-300"
             />
-          </>
+          </div>
         )}
 
         {/* 空狀態 */}
         {!creating && !selected && (
-          <div className="flex items-center justify-center h-48 text-slate-400 text-sm">
-            點擊日曆上有記錄的日期查看，或按「+ 新增日誌」
+          <div className="flex flex-col items-center justify-center h-64 text-slate-400 text-sm gap-2">
+            <span className="text-3xl">📅</span>
+            <p>選擇日期查看日誌，或新增今天的記錄</p>
           </div>
         )}
 
         {/* 載入中 */}
         {!creating && selected && loading && (
-          <div className="flex items-center justify-center h-48 text-slate-400 text-sm">載入中...</div>
+          <div className="flex items-center justify-center h-64 text-slate-400 text-sm">載入中...</div>
         )}
 
-        {/* 檢視 / 編輯模式 */}
+        {/* 檢視 / 編輯 */}
         {!creating && selected && !loading && content && (
           <>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-slate-800">📅 {selected}</h2>
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <div>
+                <p className="text-xs text-slate-400 mb-0.5">工作日誌</p>
+                <h2 className="font-bold text-slate-800 text-base">{selected}</h2>
+              </div>
               <div className="flex gap-2">
-                {!editing && (
+                {!editing ? (
                   <>
                     <button onClick={() => { setEditing(true); setEditMd(content) }}
-                      className="text-sm px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600">編輯</button>
+                      className="text-sm px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium">編輯</button>
                     <button onClick={handleDelete} disabled={deleting}
-                      className="text-sm px-3 py-1 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 disabled:opacity-50">刪除</button>
+                      className="text-sm px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 font-medium disabled:opacity-50">刪除</button>
                   </>
-                )}
-                {editing && (
+                ) : (
                   <>
                     <button onClick={handleSave} disabled={saving}
-                      className="text-sm px-3 py-1 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">
+                      className="text-sm px-4 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 font-medium disabled:opacity-50">
                       {saving ? '儲存中...' : '儲存'}
                     </button>
                     <button onClick={() => setEditing(false)}
-                      className="text-sm px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600">取消</button>
+                      className="text-sm px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600">取消</button>
                   </>
                 )}
               </div>
             </div>
 
-            {editing ? (
-              <textarea
-                value={editMd}
-                onChange={e => setEditMd(e.target.value)}
-                className="w-full h-80 text-sm font-mono border border-slate-200 rounded-xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-300"
-              />
-            ) : (
-              <div className="space-y-4 text-sm">
-                {parsed?.entries.length > 0 && (
-                  <div>
-                    <p className="font-semibold text-slate-700 mb-2">今日工作紀錄</p>
-                    <ul className="space-y-1">
-                      {parsed.entries.map((e, i) => (
-                        <li key={i} className="flex gap-2 text-slate-600"><span className="text-indigo-400">•</span>{e}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {parsed?.highlights.length > 0 && (
-                  <div>
-                    <p className="font-semibold text-slate-700 mb-2">履歷亮點故事</p>
-                    <div className="space-y-2">
-                      {parsed.highlights.map((h, i) => (
-                        <div key={i} className="bg-amber-50 rounded-xl p-3 border border-amber-100">
-                          <p><span className="text-amber-700 font-medium">問題：</span>{h.problem}</p>
-                          <p><span className="text-amber-700 font-medium">解法：</span>{h.solution}</p>
-                          <p><span className="text-amber-700 font-medium">成效：</span>{h.result}</p>
-                          <span className="inline-block mt-1 text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full">{h.category}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {parsed?.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {parsed.tags.map(t => (
-                      <span key={t} className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full">{t}</span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Body */}
+            <div className="p-5">
+              {editing ? (
+                <textarea
+                  value={editMd} onChange={e => setEditMd(e.target.value)}
+                  className="w-full h-80 text-sm font-mono border border-slate-200 rounded-xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                />
+              ) : (
+                <JournalViewer parsed={parsed} />
+              )}
+            </div>
           </>
         )}
       </div>
