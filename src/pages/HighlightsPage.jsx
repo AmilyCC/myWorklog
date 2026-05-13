@@ -170,7 +170,7 @@ export default function HighlightsPage() {
           <p className="text-sm font-semibold text-slate-700">分類管理</p>
           <div className="flex flex-wrap gap-2">
             {categories.map(c => (
-              <span key={c} className="flex items-center gap-1 bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm">
+              <span key={c} className="flex items-center gap-1 bg-primary-50 text-primary-700 border border-primary-200 px-3 py-1 rounded-full text-sm">
                 {c}
                 <button
                   onClick={() => deleteCategory(c)}
@@ -230,7 +230,7 @@ export default function HighlightsPage() {
             className={`px-3 py-1.5 rounded-full text-sm transition ${
               activeCategory === c
                 ? 'bg-primary-600 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                : 'bg-primary-50 text-primary-600 border border-primary-100 hover:bg-primary-100'
             }`}
           >
             {c}
@@ -260,7 +260,7 @@ export default function HighlightsPage() {
         {visibleWithIdx.map(({ h, i }) => {
           const isEditing = editingId === i
           return (
-            <div key={i} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <div key={i} className="bg-white rounded-2xl border border-slate-200 border-l-4 border-l-accent-400 p-5 shadow-sm">
               {isEditing ? (
                 <div className="space-y-3">
                   <div>
@@ -295,10 +295,10 @@ export default function HighlightsPage() {
               ) : (
                 <>
                   <div className="flex items-start justify-between gap-2 mb-3">
-                    <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-medium">
+                    <span className="text-xs bg-accent-100 text-accent-700 px-2 py-0.5 rounded-full font-medium">
                       {h.category || '未分類'}
                     </span>
-                    <span className="text-xs text-slate-400">{h.date}</span>
+                    <span className="text-xs text-primary-400 font-medium">{h.date}</span>
                   </div>
                   <div className="space-y-2 text-sm">
                     <p><span className="font-semibold text-accent-600">問題：</span><span className="text-slate-700">{h.problem}</span></p>

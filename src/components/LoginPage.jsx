@@ -5,10 +5,10 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-slate-100">
-      <div className="bg-white rounded-2xl shadow-lg p-10 flex flex-col items-center gap-6 w-80">
+      <div className="bg-white rounded-2xl shadow-lg p-10 flex flex-col items-center gap-6 w-96">
         <img src="/logo.png" alt="logo" className="w-20 h-20 object-contain" />
         <div className="text-center">
-          <h1 className="text-xl font-bold text-slate-800">Amily エミリー的工作日誌</h1>
+          <h1 className="text-xl font-bold text-slate-800 whitespace-nowrap">Amily エミリー的工作日誌</h1>
           <p className="text-slate-400 text-sm mt-1">記錄每天的工作成果</p>
         </div>
         <button

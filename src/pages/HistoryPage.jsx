@@ -95,27 +95,24 @@ function JournalViewer({ parsed }) {
 
       {parsed?.highlights.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-amber-600 tracking-wide mb-3">✨ 履歷亮點故事</p>
+          <p className="text-xs font-semibold text-accent-600 tracking-wide mb-3">✨ 履歷亮點故事</p>
           <div className="space-y-3">
             {parsed.highlights.map((h, i) => (
-              <div key={i} className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                <span className="inline-block mb-3 text-xs bg-amber-200 text-amber-800 px-2.5 py-0.5 rounded-full font-medium">
+              <div key={i} className="bg-accent-50 border border-accent-200 rounded-xl p-4 border-l-4 border-l-accent-400">
+                <span className="inline-block mb-3 text-xs bg-accent-100 text-accent-700 px-2.5 py-0.5 rounded-full font-medium">
                   {h.category || '其他'}
                 </span>
                 <div className="space-y-1.5 text-sm">
                   <p className="leading-relaxed">
-                    <span className="font-semibold text-accent-600">問</span>
-                    <span className="text-slate-300 mx-1.5">|</span>
+                    <span className="font-semibold text-accent-600">問題：</span>
                     <span className="text-slate-700">{h.problem}</span>
                   </p>
                   <p className="leading-relaxed">
-                    <span className="font-semibold text-blue-500">解法</span>
-                    <span className="text-slate-300 mx-1.5">|</span>
+                    <span className="font-semibold text-primary-600">解法：</span>
                     <span className="text-slate-700">{h.solution}</span>
                   </p>
                   <p className="leading-relaxed">
-                    <span className="font-semibold text-green-500">成效</span>
-                    <span className="text-slate-300 mx-1.5">|</span>
+                    <span className="font-semibold text-primary-400">成效：</span>
                     <span className="text-slate-700">{h.result}</span>
                   </p>
                 </div>
@@ -127,7 +124,7 @@ function JournalViewer({ parsed }) {
 
       {parsed?.tags.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-slate-400 tracking-wide mb-2">標籤</p>
+          <p className="text-xs font-semibold text-primary-500 tracking-wide mb-2">標籤</p>
           <div className="flex flex-wrap gap-1.5">
             {parsed.tags.map(t => (
               <span key={t} className="text-xs bg-primary-50 text-primary-600 border border-primary-200 px-3 py-1 rounded-full">
