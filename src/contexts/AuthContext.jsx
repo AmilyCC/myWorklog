@@ -2,6 +2,30 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { GOOGLE_CLIENT_ID, DRIVE_SCOPE } from '../config'
 
 const AuthContext = createContext(null)
+const TOKEN_KEY  = 'gd_access_token'
+const EXPIRY_KEY = 'gd_token_expiry'
+
+function saveToken(token, expiresIn) {
+  localStorage.setItem(TOKEN_KEY, token)
+  localStorage.setItem(EXPIRY_KEY, Date.now() + expiresIn * 1000)
+}
+
+function loadSavedToken() {
+  const token  = localStorage.getItem(TOKEN_KEY)
+  const expiry = Number(localStorage.getItem(EXPIRY_KEY))
+  if (!token || !expiry) return null
+  if (Date.now() > expiry - 60_000) { // 快到期就當過期
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(EXPIRY_KEY)
+    return null
+  }
+  return token
+}
+
+function clearSavedToken() {
+  localStorage.removeItem(TOKEN_KEY)
+  localStorage.removeItem(EXPIRY_KEY)
+}
 
 function buildAuthUrl() {
   const params = new URLSearchParams({
@@ -17,8 +41,9 @@ function buildAuthUrl() {
 function parseHashParams() {
   const params = new URLSearchParams(window.location.hash.slice(1))
   return {
-    token: params.get('access_token') || null,
-    error: params.get('error') || null,
+    token:     params.get('access_token') || null,
+    expiresIn: Number(params.get('expires_in')) || 3600,
+    error:     params.get('error') || null,
   }
 }
 
@@ -30,16 +55,24 @@ async function fetchUserInfo(accessToken) {
 }
 
 export function AuthProvider({ children }) {
-  const [token, setToken]         = useState(null)
+  const [token, setToken]         = useState(() => loadSavedToken())
   const [user, setUser]           = useState(null)
   const [authError, setAuthError] = useState(null)
 
+  // 有 token 就取 user info
   useEffect(() => {
-    const { token: hashToken, error } = parseHashParams()
+    if (token && !user) {
+      fetchUserInfo(token).then(setUser).catch(console.error)
+    }
+  }, [token])
+
+  // 從 URL hash 讀 token（OAuth redirect 回來後）
+  useEffect(() => {
+    const { token: hashToken, expiresIn, error } = parseHashParams()
     if (hashToken) {
       window.history.replaceState(null, '', window.location.pathname)
+      saveToken(hashToken, expiresIn)
       setToken(hashToken)
-      fetchUserInfo(hashToken).then(setUser).catch(console.error)
     } else if (error) {
       window.history.replaceState(null, '', window.location.pathname)
       setAuthError(error)
@@ -55,6 +88,7 @@ export function AuthProvider({ children }) {
       fetch(`https://oauth2.googleapis.com/revoke?token=${token}`, { method: 'POST' })
         .catch(() => {})
     }
+    clearSavedToken()
     setToken(null)
     setUser(null)
   }, [token])
