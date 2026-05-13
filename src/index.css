@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-800;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  .chat-bubble-user {
+    @apply bg-indigo-600 text-white rounded-2xl rounded-tr-sm px-4 py-2 max-w-xs ml-auto text-sm;
+  }
+  .chat-bubble-bot {
+    @apply bg-white text-slate-700 rounded-2xl rounded-tl-sm px-4 py-2 max-w-xs text-sm shadow-sm border border-slate-100;
+  }
+}
