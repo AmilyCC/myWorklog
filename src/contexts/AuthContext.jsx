@@ -3,11 +3,33 @@ import { GOOGLE_CLIENT_ID, DRIVE_SCOPE } from '../config'
 
 const AuthContext = createContext(null)
 
+function parseHashToken() {
+  const params = new URLSearchParams(window.location.hash.slice(1))
+  return params.get('access_token') || null
+}
+
+async function fetchUserInfo(accessToken) {
+  const r = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  return r.json()
+}
+
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(null)
-  const [user, setUser] = useState(null)
-  const [ready, setReady] = useState(false)
-  const clientRef = useRef(null)
+  const [token, setToken]   = useState(null)
+  const [user, setUser]     = useState(null)
+  const [ready, setReady]   = useState(false)
+  const clientRef           = useRef(null)
+
+  // redirect mode：頁面載入時從 URL hash 取 token
+  useEffect(() => {
+    const hashToken = parseHashToken()
+    if (hashToken) {
+      window.history.replaceState(null, '', window.location.pathname)
+      setToken(hashToken)
+      fetchUserInfo(hashToken).then(setUser).catch(console.error)
+    }
+  }, [])
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -16,16 +38,8 @@ export function AuthProvider({ children }) {
         clientRef.current = window.google.accounts.oauth2.initTokenClient({
           client_id: GOOGLE_CLIENT_ID,
           scope: DRIVE_SCOPE,
-          callback: async (resp) => {
-            if (resp.error) { console.error(resp); return }
-            setToken(resp.access_token)
-            try {
-              const r = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-                headers: { Authorization: `Bearer ${resp.access_token}` },
-              })
-              setUser(await r.json())
-            } catch (e) { console.error(e) }
-          },
+          ux_mode: 'redirect',
+          redirect_uri: window.location.origin,
         })
         setReady(true)
       }
@@ -39,7 +53,6 @@ export function AuthProvider({ children }) {
     if (token) window.google?.accounts.oauth2.revoke(token, () => {})
     setToken(null)
     setUser(null)
-    localStorage.removeItem('pm_folder_id')
   }, [token])
 
   return (
