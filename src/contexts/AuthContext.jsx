@@ -1,7 +1,18 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 import { GOOGLE_CLIENT_ID, DRIVE_SCOPE } from '../config'
 
 const AuthContext = createContext(null)
+
+function buildAuthUrl() {
+  const params = new URLSearchParams({
+    client_id: GOOGLE_CLIENT_ID,
+    redirect_uri: window.location.origin,
+    response_type: 'token',
+    scope: DRIVE_SCOPE,
+    prompt: 'select_account',
+  })
+  return `https://accounts.google.com/o/oauth2/v2/auth?${params}`
+}
 
 function parseHashParams() {
   const params = new URLSearchParams(window.location.hash.slice(1))
@@ -19,13 +30,10 @@ async function fetchUserInfo(accessToken) {
 }
 
 export function AuthProvider({ children }) {
-  const [token, setToken]     = useState(null)
-  const [user, setUser]       = useState(null)
-  const [ready, setReady]     = useState(false)
+  const [token, setToken]         = useState(null)
+  const [user, setUser]           = useState(null)
   const [authError, setAuthError] = useState(null)
-  const clientRef             = useRef(null)
 
-  // 頁面載入時從 URL hash 取 token（redirect 回來後）
   useEffect(() => {
     const { token: hashToken, error } = parseHashParams()
     if (hashToken) {
@@ -38,32 +46,21 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  useEffect(() => {
-    const id = setInterval(() => {
-      if (window.google?.accounts?.oauth2) {
-        clearInterval(id)
-        clientRef.current = window.google.accounts.oauth2.initTokenClient({
-          client_id: GOOGLE_CLIENT_ID,
-          scope: DRIVE_SCOPE,
-          ux_mode: 'redirect',
-          redirect_uri: window.location.origin,
-        })
-        setReady(true)
-      }
-    }, 200)
-    return () => clearInterval(id)
+  const login = useCallback(() => {
+    window.location.href = buildAuthUrl()
   }, [])
 
-  const login = useCallback(() => clientRef.current?.requestAccessToken(), [])
-
   const logout = useCallback(() => {
-    if (token) window.google?.accounts.oauth2.revoke(token, () => {})
+    if (token) {
+      fetch(`https://oauth2.googleapis.com/revoke?token=${token}`, { method: 'POST' })
+        .catch(() => {})
+    }
     setToken(null)
     setUser(null)
   }, [token])
 
   return (
-    <AuthContext.Provider value={{ token, user, ready, login, logout, authError }}>
+    <AuthContext.Provider value={{ token, user, login, logout, authError }}>
       {children}
     </AuthContext.Provider>
   )
