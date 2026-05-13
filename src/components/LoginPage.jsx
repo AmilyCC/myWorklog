@@ -1,7 +1,7 @@
 import { useAuth } from '../contexts/AuthContext'
 
 export default function LoginPage() {
-  const { login, ready } = useAuth()
+  const { login, ready, authError } = useAuth()
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-slate-100">
@@ -24,7 +24,12 @@ export default function LoginPage() {
           </svg>
           {ready ? '使用 Google 帳號登入' : '載入中...'}
         </button>
-        <p className="text-xs text-slate-400 text-center">日誌將儲存於你的 Google Drive「PM工作日誌」資料夾</p>
+        {authError && (
+          <p className="text-xs text-red-500 text-center bg-red-50 px-3 py-2 rounded-lg w-full break-all">
+            錯誤：{authError}
+          </p>
+        )}
+        <p className="text-xs text-slate-400 text-center">日誌將儲存於你的 Google Drive</p>
       </div>
     </div>
   )

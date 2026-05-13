@@ -3,9 +3,12 @@ import { GOOGLE_CLIENT_ID, DRIVE_SCOPE } from '../config'
 
 const AuthContext = createContext(null)
 
-function parseHashToken() {
+function parseHashParams() {
   const params = new URLSearchParams(window.location.hash.slice(1))
-  return params.get('access_token') || null
+  return {
+    token: params.get('access_token') || null,
+    error: params.get('error') || null,
+  }
 }
 
 async function fetchUserInfo(accessToken) {
@@ -16,18 +19,22 @@ async function fetchUserInfo(accessToken) {
 }
 
 export function AuthProvider({ children }) {
-  const [token, setToken]   = useState(null)
-  const [user, setUser]     = useState(null)
-  const [ready, setReady]   = useState(false)
-  const clientRef           = useRef(null)
+  const [token, setToken]     = useState(null)
+  const [user, setUser]       = useState(null)
+  const [ready, setReady]     = useState(false)
+  const [authError, setAuthError] = useState(null)
+  const clientRef             = useRef(null)
 
-  // redirect mode：頁面載入時從 URL hash 取 token
+  // 頁面載入時從 URL hash 取 token（redirect 回來後）
   useEffect(() => {
-    const hashToken = parseHashToken()
+    const { token: hashToken, error } = parseHashParams()
     if (hashToken) {
       window.history.replaceState(null, '', window.location.pathname)
       setToken(hashToken)
       fetchUserInfo(hashToken).then(setUser).catch(console.error)
+    } else if (error) {
+      window.history.replaceState(null, '', window.location.pathname)
+      setAuthError(error)
     }
   }, [])
 
@@ -56,7 +63,7 @@ export function AuthProvider({ children }) {
   }, [token])
 
   return (
-    <AuthContext.Provider value={{ token, user, ready, login, logout }}>
+    <AuthContext.Provider value={{ token, user, ready, login, logout, authError }}>
       {children}
     </AuthContext.Provider>
   )
