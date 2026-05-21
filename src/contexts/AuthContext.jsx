@@ -101,11 +101,11 @@ export function AuthProvider({ children }) {
     } else if (error) {
       window.history.replaceState(null, '', window.location.pathname)
       // interaction_required / login_required = Google session 也過期，需手動登入
-      const isSessionExpired = error === 'interaction_required' || error === 'login_required'
+      const needsManualLogin = ['interaction_required', 'login_required', 'consent_required'].includes(error)
       clearUserInfo()
       setUser(null)
       setToken(null)
-      if (!isSessionExpired) setAuthError(error)
+      if (!needsManualLogin) setAuthError(error)
       setInitializing(false)
     }
   }, [])
