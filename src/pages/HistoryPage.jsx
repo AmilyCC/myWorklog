@@ -168,7 +168,7 @@ export default function HistoryPage() {
   function startCreating() {
     const today = toDateStr()
     setNewDate(today)
-    setNewMd(newJournalTemplate(today))
+    setNewMd('')
     setCreating(true)
     setSelected(null)
     setContent(null)
@@ -177,7 +177,6 @@ export default function HistoryPage() {
 
   function handleNewDateChange(date) {
     setNewDate(date)
-    setNewMd(newJournalTemplate(date))
   }
 
   async function handleCreate() {
@@ -314,6 +313,7 @@ export default function HistoryPage() {
             </div>
             <textarea
               value={newMd} onChange={e => setNewMd(e.target.value)}
+              placeholder={`## 今日工作紀錄\n- \n\n## 履歷亮點故事\n- 問題：| 解法：| 成效：\n\n## 關鍵字標籤`}
               className="w-full h-80 text-sm font-mono border border-slate-200 rounded-xl p-3 resize-none focus:outline-none focus:ring-2 focus:ring-primary-300"
             />
           </div>
