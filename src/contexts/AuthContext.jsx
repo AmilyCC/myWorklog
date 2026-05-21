@@ -124,6 +124,13 @@ export function AuthProvider({ children }) {
     window.location.href = buildAuthUrl({ prompt: 'select_account' })
   }, [])
 
+  // 強制重新授權（偵測到 scope 不足時使用）
+  const reauth = useCallback(() => {
+    clearSavedToken()
+    clearUserInfo()
+    window.location.href = buildAuthUrl({ prompt: 'consent' })
+  }, [])
+
   const logout = useCallback(() => {
     if (token) {
       fetch(`https://oauth2.googleapis.com/revoke?token=${token}`, { method: 'POST' }).catch(() => {})
@@ -143,7 +150,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ token, user, login, logout, authError }}>
+    <AuthContext.Provider value={{ token, user, login, logout, reauth, authError }}>
       {children}
     </AuthContext.Provider>
   )

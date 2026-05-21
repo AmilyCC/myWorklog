@@ -8,7 +8,9 @@ async function req(url, opts, token) {
   })
   if (!res.ok) {
     const text = await res.text()
-    throw new Error(`Drive API ${res.status}: ${text}`)
+    const err = new Error(`Drive API ${res.status}: ${text}`)
+    if (res.status === 403 && text.includes('insufficientPermissions')) err.isScopeError = true
+    throw err
   }
   return res
 }
