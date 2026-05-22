@@ -265,25 +265,6 @@ export default function HistoryPage() {
           />
         </div>
 
-        {/* 最近日誌 */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-3 space-y-1">
-          <p className="text-xs text-slate-400 px-1 pb-1">最近日誌</p>
-          {files.slice(0, 10).map(f => {
-            const date = dateFromFilename(f.name)
-            return (
-              <button key={f.id} onClick={() => selectDate(date)}
-                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition flex items-center justify-between ${
-                  selected === date
-                    ? 'bg-primary-50 text-primary-700 font-semibold'
-                    : 'hover:bg-slate-50 text-slate-600'
-                }`}>
-                <span>{date}</span>
-                {selected === date && <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />}
-              </button>
-            )
-          })}
-          {files.length === 0 && <p className="text-sm text-slate-400 px-1 py-2">尚無日誌</p>}
-        </div>
       </div>
 
       {/* 右側內容 */}
