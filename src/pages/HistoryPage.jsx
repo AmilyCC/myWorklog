@@ -89,7 +89,7 @@ function JournalViewer({ parsed }) {
     <div className="space-y-5">
       {parsed?.entries.length > 0 && (
         <div>
-          <SectionLabel className="bg-primary-100 text-primary-700">今日工作紀錄</SectionLabel>
+          <SectionLabel className="text-primary-700">📋 今日工作紀錄</SectionLabel>
           <div className="bg-primary-50 rounded-xl p-4 border-l-4 border-primary-400">
             <ul className="space-y-2">
               {parsed.entries.map((e, i) => (
@@ -105,7 +105,7 @@ function JournalViewer({ parsed }) {
 
       {parsed?.highlights.length > 0 && (
         <div>
-          <SectionLabel className="bg-accent-100 text-accent-700">✨ 履歷亮點故事</SectionLabel>
+          <SectionLabel className="text-accent-700">✨ 履歷亮點故事</SectionLabel>
           <div className="space-y-3">
             {parsed.highlights.map((h, i) => (
               <div key={i} className="bg-accent-50 border border-accent-200 rounded-xl p-4 border-l-4 border-l-accent-400">
@@ -134,7 +134,7 @@ function JournalViewer({ parsed }) {
 
       {parsed?.tags.length > 0 && (
         <div>
-          <SectionLabel className="bg-slate-100 text-slate-500">標籤</SectionLabel>
+          <SectionLabel className="text-slate-500">🏷️ 標籤</SectionLabel>
           <div className="flex flex-wrap gap-1.5">
             {parsed.tags.map(t => (
               <span key={t} className="text-xs bg-primary-50 text-primary-600 border border-primary-200 px-3 py-1 rounded-full">
