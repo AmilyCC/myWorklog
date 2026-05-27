@@ -95,7 +95,7 @@ function JournalViewer({ parsed }) {
               {parsed.entries.map((e, i) => {
                 const match = e.match(/^\[(.+?)\]\s*(.*)$/)
                 return (
-                  <li key={i} className="text-sm text-slate-700 leading-relaxed py-2 first:pt-0 last:pb-0">
+                  <li key={i} className="text-sm text-slate-700 leading-relaxed py-2 first:pt-0 last:pb-0 text-justify">
                     {match ? (
                       <>
                         <span className="font-bold text-primary-700">{match[1]}</span>
