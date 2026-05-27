@@ -78,7 +78,7 @@ function Calendar({ year, month, markedDates, selected, onSelect, onYearMonth })
 
 function SectionLabel({ children, className }) {
   return (
-    <p className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full mb-3 ${className}`}>
+    <p className={`text-xs font-semibold mb-3 ${className}`}>
       {children}
     </p>
   )
