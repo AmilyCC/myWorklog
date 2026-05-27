@@ -289,7 +289,7 @@ export default function HighlightsPage() {
         </div>
       )}
 
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4">
         {visibleWithIdx.map(({ h, i }) => {
           const isEditing = editingId === i
           return (
