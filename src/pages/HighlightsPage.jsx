@@ -300,7 +300,7 @@ export default function HighlightsPage() {
                     </span>
                     <span className="text-xs text-primary-400 font-medium">{h.date}</span>
                   </div>
-                  <div className="space-y-2 text-sm">
+                  <div className="space-y-2 text-sm text-justify">
                     <p><span className="font-semibold text-accent-600">問題：</span><span className="text-slate-700">{h.problem}</span></p>
                     <p><span className="font-semibold text-primary-600">解法：</span><span className="text-slate-700">{h.solution}</span></p>
                     <p><span className="font-semibold text-green-600">成效：</span><span className="text-slate-700">{h.result}</span></p>
