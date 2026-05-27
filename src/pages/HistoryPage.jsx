@@ -120,7 +120,7 @@ function JournalViewer({ parsed }) {
                 <span className="inline-block mb-3 text-xs bg-accent-100 text-accent-700 px-2.5 py-0.5 rounded-full font-medium">
                   {h.category || '其他'}
                 </span>
-                <div className="space-y-1.5 text-sm">
+                <div className="space-y-1.5 text-sm text-justify">
                   <p className="leading-relaxed">
                     <span className="font-semibold text-accent-600">問題：</span>
                     <span className="text-slate-700">{h.problem}</span>
