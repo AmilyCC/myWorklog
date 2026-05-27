@@ -221,27 +221,18 @@ export default function HighlightsPage() {
         className="w-full text-sm border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-300"
       />
 
-      {/* 分類 tabs */}
-      <div className="flex gap-2 flex-wrap">
+      {/* 分類下拉選單 */}
+      <select
+        value={activeCategory}
+        onChange={e => setActiveCategory(e.target.value)}
+        className="text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-300 text-slate-700"
+      >
         {allCategoryTabs.map(c => (
-          <button
-            key={c}
-            onClick={() => setActiveCategory(c)}
-            className={`px-3 py-1.5 rounded-full text-sm transition ${
-              activeCategory === c
-                ? 'bg-primary-600 text-white'
-                : 'bg-primary-50 text-primary-600 border border-primary-100 hover:bg-primary-100'
-            }`}
-          >
-            {c}
-            {c !== '全部' && (
-              <span className="ml-1 opacity-60">
-                ({highlights.filter(h => h.category === c).length})
-              </span>
-            )}
-          </button>
+          <option key={c} value={c}>
+            {c}{c !== '全部' ? ` (${highlights.filter(h => h.category === c).length})` : ''}
+          </option>
         ))}
-      </div>
+      </select>
 
       {/* 內容 */}
       {loading && <div className="text-center text-slate-400 py-12">載入中...</div>}
