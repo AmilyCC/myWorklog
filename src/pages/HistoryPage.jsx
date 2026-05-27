@@ -76,26 +76,36 @@ function Calendar({ year, month, markedDates, selected, onSelect, onYearMonth })
   )
 }
 
+function SectionLabel({ children, className }) {
+  return (
+    <p className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full mb-3 ${className}`}>
+      {children}
+    </p>
+  )
+}
+
 function JournalViewer({ parsed }) {
   return (
     <div className="space-y-5">
       {parsed?.entries.length > 0 && (
-        <div className="bg-primary-50 rounded-xl p-4 border-l-4 border-primary-400">
-          <p className="text-xs font-semibold text-primary-600 tracking-wide mb-3">今日工作紀錄</p>
-          <ul className="space-y-2">
-            {parsed.entries.map((e, i) => (
-              <li key={i} className="flex gap-2 text-sm text-slate-700 leading-relaxed">
-                <span className="text-primary-400 shrink-0 mt-0.5">•</span>
-                <span>{e}</span>
-              </li>
-            ))}
-          </ul>
+        <div>
+          <SectionLabel className="bg-primary-100 text-primary-700">今日工作紀錄</SectionLabel>
+          <div className="bg-primary-50 rounded-xl p-4 border-l-4 border-primary-400">
+            <ul className="space-y-2">
+              {parsed.entries.map((e, i) => (
+                <li key={i} className="flex gap-2 text-sm text-slate-700 leading-relaxed">
+                  <span className="text-primary-400 shrink-0 mt-0.5">•</span>
+                  <span>{e}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
 
       {parsed?.highlights.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-accent-600 tracking-wide mb-3">✨ 履歷亮點故事</p>
+          <SectionLabel className="bg-accent-100 text-accent-700">✨ 履歷亮點故事</SectionLabel>
           <div className="space-y-3">
             {parsed.highlights.map((h, i) => (
               <div key={i} className="bg-accent-50 border border-accent-200 rounded-xl p-4 border-l-4 border-l-accent-400">
@@ -124,7 +134,7 @@ function JournalViewer({ parsed }) {
 
       {parsed?.tags.length > 0 && (
         <div>
-          <p className="text-xs font-semibold text-primary-500 tracking-wide mb-2">標籤</p>
+          <SectionLabel className="bg-slate-100 text-slate-500">標籤</SectionLabel>
           <div className="flex flex-wrap gap-1.5">
             {parsed.tags.map(t => (
               <span key={t} className="text-xs bg-primary-50 text-primary-600 border border-primary-200 px-3 py-1 rounded-full">
