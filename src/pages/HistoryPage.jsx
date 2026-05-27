@@ -91,7 +91,7 @@ function JournalViewer({ parsed }) {
         <div>
           <SectionLabel className="text-primary-700">📋 今日工作紀錄</SectionLabel>
           <div className="bg-primary-50 rounded-xl p-4 border-l-4 border-primary-400">
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-primary-200">
               {parsed.entries.map((e, i) => {
                 const match = e.match(/^\[(.+?)\]\s*(.*)$/)
                 return (
