@@ -91,21 +91,18 @@ function JournalViewer({ parsed }) {
         <div>
           <SectionLabel className="text-primary-700">📋 今日工作紀錄</SectionLabel>
           <div className="bg-primary-50 rounded-xl p-4 border-l-4 border-primary-400">
-            <ul className="space-y-2">
+            <ul className="divide-y divide-slate-100">
               {parsed.entries.map((e, i) => {
                 const match = e.match(/^\[(.+?)\]\s*(.*)$/)
                 return (
-                  <li key={i} className="flex gap-2 text-sm text-slate-700 leading-relaxed">
-                    <span className="text-primary-400 shrink-0 mt-0.5">•</span>
-                    <span>
-                      {match ? (
-                        <>
-                          <span className="font-medium text-primary-700">{match[1]}</span>
-                          <span className="text-slate-300 mx-1.5">|</span>
-                          {match[2]}
-                        </>
-                      ) : e}
-                    </span>
+                  <li key={i} className="text-sm text-slate-700 leading-relaxed py-2 first:pt-0 last:pb-0">
+                    {match ? (
+                      <>
+                        <span className="font-medium text-primary-700">{match[1]}</span>
+                        <span className="text-slate-300 mx-1.5">|</span>
+                        {match[2]}
+                      </>
+                    ) : e}
                   </li>
                 )
               })}
