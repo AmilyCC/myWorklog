@@ -341,10 +341,18 @@ export default function HistoryPage() {
               <div className="flex gap-2">
                 {!editing ? (
                   <>
-                    <button onClick={() => { setEditing(true); setEditMd(content) }}
-                      className="text-sm px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium">編輯</button>
-                    <button onClick={handleDelete} disabled={deleting}
-                      className="text-sm px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-accent-600 font-medium disabled:opacity-50">刪除</button>
+                    <button onClick={() => { setEditing(true); setEditMd(content) }} title="編輯"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-primary-600 hover:bg-primary-50 transition">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828A2 2 0 0110 16.414H8v-2a2 2 0 01.586-1.414z" />
+                      </svg>
+                    </button>
+                    <button onClick={handleDelete} disabled={deleting} title="刪除"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-accent-600 hover:bg-accent-50 transition disabled:opacity-50">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4h6v3M4 7h16" />
+                      </svg>
+                    </button>
                   </>
                 ) : (
                   <>
