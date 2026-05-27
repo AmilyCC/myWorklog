@@ -333,13 +333,11 @@ export default function HighlightsPage() {
                     <p><span className="font-semibold text-green-600">成效：</span><span className="text-slate-700">{h.result}</span></p>
                   </div>
                   <div className="flex items-center justify-between mt-4">
+                    <span className="text-xs bg-accent-100 text-accent-700 px-2 py-0.5 rounded-full font-medium">
+                      {h.category || '未分類'}
+                    </span>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs bg-accent-100 text-accent-700 px-2 py-0.5 rounded-full font-medium">
-                        {h.category || '未分類'}
-                      </span>
                       <span className="text-xs text-primary-400 font-medium">{h.date}</span>
-                    </div>
-                    <div className="flex gap-2">
                       <button onClick={() => startEdit(i, h)} className="text-xs px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg">編輯</button>
                       <button onClick={() => deleteHighlight(i)} className="text-xs px-3 py-1.5 bg-red-50 hover:bg-red-100 text-accent-600 rounded-lg">刪除</button>
                     </div>
