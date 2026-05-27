@@ -24,8 +24,7 @@ function Calendar({ year, month, markedDates, selected, onSelect, onYearMonth })
   const fmt = (d) => `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
   const DAYS = ['日', '一', '二', '三', '四', '五', '六']
   const MONTHS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月']
-  const currentYear = new Date().getFullYear()
-  const years = Array.from({ length: currentYear - 2020 + 2 }, (_, i) => 2020 + i)
+  const years = Array.from({ length: 2035 - 2024 + 1 }, (_, i) => 2024 + i)
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-4">
