@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useDrive } from '../hooks/useDrive'
 import { HIGHLIGHT_CATEGORIES } from '../config'
 import {
@@ -7,6 +7,53 @@ import {
 } from '../utils/journalUtils'
 
 const CAT_STORAGE_KEY = 'highlight_categories'
+
+function CategoryDropdown({ options, value, onChange, counts }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    function handleClick(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 hover:border-primary-300 hover:bg-primary-50 transition focus:outline-none focus:ring-2 focus:ring-primary-300"
+      >
+        <span className="font-medium text-primary-700">{value}</span>
+        {value !== '全部' && <span className="text-slate-400">({counts[value] ?? 0})</span>}
+        <svg className={`w-4 h-4 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute z-20 mt-1 w-48 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+          {options.map(c => (
+            <button
+              key={c}
+              onClick={() => { onChange(c); setOpen(false) }}
+              className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition ${
+                value === c
+                  ? 'bg-primary-50 text-primary-700 font-semibold'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <span>{c}</span>
+              {c !== '全部' && <span className="text-slate-400 text-xs">{counts[c] ?? 0}</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function getStoredCategories() {
   try {
@@ -222,17 +269,12 @@ export default function HighlightsPage() {
       />
 
       {/* 分類下拉選單 */}
-      <select
+      <CategoryDropdown
+        options={allCategoryTabs}
         value={activeCategory}
-        onChange={e => setActiveCategory(e.target.value)}
-        className="text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-300 text-slate-700"
-      >
-        {allCategoryTabs.map(c => (
-          <option key={c} value={c}>
-            {c}{c !== '全部' ? ` (${highlights.filter(h => h.category === c).length})` : ''}
-          </option>
-        ))}
-      </select>
+        onChange={setActiveCategory}
+        counts={Object.fromEntries(categories.map(c => [c, highlights.filter(h => h.category === c).length]))}
+      />
 
       {/* 內容 */}
       {loading && <div className="text-center text-slate-400 py-12">載入中...</div>}
