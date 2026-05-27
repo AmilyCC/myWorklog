@@ -98,7 +98,7 @@ function JournalViewer({ parsed }) {
                   <li key={i} className="text-sm text-slate-700 leading-relaxed py-2 first:pt-0 last:pb-0">
                     {match ? (
                       <>
-                        <span className="font-medium text-primary-700">{match[1]}</span>
+                        <span className="font-bold text-primary-700">{match[1]}</span>
                         <span className="text-slate-300 mx-1.5">|</span>
                         {match[2]}
                       </>
