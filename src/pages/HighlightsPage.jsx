@@ -217,11 +217,11 @@ export default function HighlightsPage() {
           <p className="text-sm font-semibold text-slate-700">分類管理</p>
           <div className="flex flex-wrap gap-2">
             {categories.map(c => (
-              <span key={c} className="flex items-center gap-1 bg-primary-50 text-primary-700 border border-primary-200 px-3 py-1 rounded-full text-sm">
+              <span key={c} className="flex items-center gap-2 bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-xl text-sm hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 transition">
                 {c}
                 <button
                   onClick={() => deleteCategory(c)}
-                  className="text-slate-400 hover:text-red-500 leading-none ml-0.5"
+                  className="text-slate-300 hover:text-accent-500 leading-none"
                 >×</button>
               </span>
             ))}
