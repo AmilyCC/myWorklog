@@ -327,15 +327,16 @@ export default function HighlightsPage() {
                 </div>
               ) : (
                 <>
+                  <p className="text-sm font-bold text-accent-700 border-b-2 border-accent-300 pb-1 mb-3">
+                    {h.category || '未分類'}
+                  </p>
                   <div className="space-y-2 text-sm text-justify">
                     <p><span className="font-semibold text-accent-600">問題：</span><span className="text-slate-700">{h.problem}</span></p>
                     <p><span className="font-semibold text-primary-600">解法：</span><span className="text-slate-700">{h.solution}</span></p>
                     <p><span className="font-semibold text-green-600">成效：</span><span className="text-slate-700">{h.result}</span></p>
                   </div>
                   <div className="flex items-center justify-between mt-4">
-                    <span className="text-xs bg-accent-100 text-accent-700 px-2 py-0.5 rounded-full font-medium">
-                      {h.category || '未分類'}
-                    </span>
+                    <span />
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-primary-400 font-medium">{h.date}</span>
                       <button onClick={() => startEdit(i, h)} className="text-xs px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg">編輯</button>
