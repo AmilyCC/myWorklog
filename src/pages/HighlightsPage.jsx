@@ -327,20 +327,22 @@ export default function HighlightsPage() {
                 </div>
               ) : (
                 <>
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <span className="text-xs bg-accent-100 text-accent-700 px-2 py-0.5 rounded-full font-medium">
-                      {h.category || '未分類'}
-                    </span>
-                    <span className="text-xs text-primary-400 font-medium">{h.date}</span>
-                  </div>
                   <div className="space-y-2 text-sm text-justify">
                     <p><span className="font-semibold text-accent-600">問題：</span><span className="text-slate-700">{h.problem}</span></p>
                     <p><span className="font-semibold text-primary-600">解法：</span><span className="text-slate-700">{h.solution}</span></p>
                     <p><span className="font-semibold text-green-600">成效：</span><span className="text-slate-700">{h.result}</span></p>
                   </div>
-                  <div className="flex gap-2 mt-4">
-                    <button onClick={() => startEdit(i, h)} className="text-xs px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg">編輯</button>
-                    <button onClick={() => deleteHighlight(i)} className="text-xs px-3 py-1.5 bg-red-50 hover:bg-red-100 text-accent-600 rounded-lg">刪除</button>
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs bg-accent-100 text-accent-700 px-2 py-0.5 rounded-full font-medium">
+                        {h.category || '未分類'}
+                      </span>
+                      <span className="text-xs text-primary-400 font-medium">{h.date}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => startEdit(i, h)} className="text-xs px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg">編輯</button>
+                      <button onClick={() => deleteHighlight(i)} className="text-xs px-3 py-1.5 bg-red-50 hover:bg-red-100 text-accent-600 rounded-lg">刪除</button>
+                    </div>
                   </div>
                 </>
               )}
