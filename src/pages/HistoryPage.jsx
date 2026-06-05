@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useDrive } from '../hooks/useDrive'
+import { useAuth } from '../contexts/AuthContext'
 import { dateFromFilename, parseJournalMd, toDateStr } from '../utils/journalUtils'
 
 function newJournalTemplate(date) {
@@ -157,6 +158,7 @@ function JournalViewer({ parsed }) {
 
 export default function HistoryPage() {
   const { listJournals, loadJournal, saveJournal, deleteJournal, syncJournalHighlights } = useDrive()
+  const { justRefreshed } = useAuth()
   const now = new Date()
   const [year, setYear]         = useState(now.getFullYear())
   const [month, setMonth]       = useState(now.getMonth())
@@ -181,6 +183,30 @@ export default function HistoryPage() {
   }, [listJournals])
 
   useEffect(() => { refresh() }, [refresh])
+
+  // Token 即將過期觸發 redirect 前，持續把草稿存入 sessionStorage
+  useEffect(() => {
+    if (editing && selected && editMd) {
+      sessionStorage.setItem('draft_date', selected)
+      sessionStorage.setItem('draft_content', editMd)
+    }
+  }, [editing, selected, editMd])
+
+  // redirect 回來後（justRefreshed=true）自動還原草稿
+  useEffect(() => {
+    if (!justRefreshed) return
+    const date    = sessionStorage.getItem('draft_date')
+    const content = sessionStorage.getItem('draft_content')
+    if (date && content) {
+      setSelected(date)
+      setEditing(true)
+      setEditMd(content)
+      setContent(content)
+      setParsed(parseJournalMd(content))
+      sessionStorage.removeItem('draft_date')
+      sessionStorage.removeItem('draft_content')
+    }
+  }, [justRefreshed])
 
   function startCreating() {
     const today = toDateStr()
@@ -235,6 +261,8 @@ export default function HistoryPage() {
       setContent(editMd)
       setParsed(parseJournalMd(editMd))
       setEditing(false)
+      sessionStorage.removeItem('draft_date')
+      sessionStorage.removeItem('draft_content')
     } catch (e) { alert('儲存失敗：' + e.message) }
     finally { setSaving(false) }
   }
@@ -360,7 +388,11 @@ export default function HistoryPage() {
                       className="text-sm px-4 py-1.5 rounded-lg bg-primary-600 text-white hover:bg-primary-700 font-medium disabled:opacity-50">
                       {saving ? '儲存中...' : '儲存'}
                     </button>
-                    <button onClick={() => setEditing(false)}
+                    <button onClick={() => {
+                      setEditing(false)
+                      sessionStorage.removeItem('draft_date')
+                      sessionStorage.removeItem('draft_content')
+                    }}
                       className="text-sm px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600">取消</button>
                   </>
                 )}

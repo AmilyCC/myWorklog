@@ -71,6 +71,7 @@ export function AuthProvider({ children }) {
   const [token, setToken]         = useState(() => loadSavedToken())
   const [user, setUser]           = useState(() => loadUserInfo())
   const [authError, setAuthError] = useState(null)
+  const [justRefreshed, setJustRefreshed] = useState(false)
   // 有儲存的用戶但 token 過期 → 需要靜默重新取得
   const [initializing, setInitializing] = useState(
     () => !loadSavedToken() && !!loadUserInfo()
@@ -81,12 +82,9 @@ export function AuthProvider({ children }) {
     const savedUser  = loadUserInfo()
     const savedToken = loadSavedToken()
     const hash = parseHashParams()
-    // 如果 URL hash 裡已有 token/error（OAuth 回調中），不重複 redirect
     if (!savedToken && savedUser?.email && !hash.token && !hash.error) {
-      window.location.href = buildAuthUrl({
-        prompt:     'none',
-        login_hint: savedUser.email,
-      })
+      sessionStorage.setItem('refreshing', '1')
+      window.location.href = buildAuthUrl({ prompt: 'none', login_hint: savedUser.email })
     }
   }, [])
 
@@ -98,10 +96,15 @@ export function AuthProvider({ children }) {
       saveToken(hashToken, expiresIn)
       setToken(hashToken)
       setInitializing(false)
+      // 若是自動更新的 redirect，通知元件還原草稿
+      if (sessionStorage.getItem('refreshing')) {
+        sessionStorage.removeItem('refreshing')
+        setJustRefreshed(true)
+      }
     } else if (error) {
       window.history.replaceState(null, '', window.location.pathname)
-      // interaction_required / login_required = Google session 也過期，需手動登入
       const needsManualLogin = ['interaction_required', 'login_required', 'consent_required'].includes(error)
+      sessionStorage.removeItem('refreshing')
       clearUserInfo()
       setUser(null)
       setToken(null)
@@ -109,6 +112,11 @@ export function AuthProvider({ children }) {
       setInitializing(false)
     }
   }, [])
+
+  // justRefreshed 只維持一個 render cycle，讓元件讀到後清除
+  useEffect(() => {
+    if (justRefreshed) setJustRefreshed(false)
+  }, [justRefreshed])
 
   // 有 token 但沒有 user info 時才去 fetch（避免重複呼叫）
   useEffect(() => {
@@ -119,6 +127,31 @@ export function AuthProvider({ children }) {
       }).catch(console.error)
     }
   }, [token])
+
+  // 主動計時：token 到期前 5 分鐘自動靜默更新（整頁 redirect，不影響草稿）
+  useEffect(() => {
+    const expiry = Number(localStorage.getItem(EXPIRY_KEY))
+    if (!expiry || !token || !user?.email) return
+    const delay = expiry - Date.now() - 5 * 60 * 1000
+    const doRefresh = () => {
+      sessionStorage.setItem('refreshing', '1')
+      window.location.href = buildAuthUrl({ prompt: 'none', login_hint: user.email })
+    }
+    if (delay <= 0) { doRefresh(); return }
+    const id = setTimeout(doRefresh, delay)
+    return () => clearTimeout(id)
+  }, [token, user])
+
+  // 確保 token 有效；若過期則靜默更新（整頁 redirect，不會丟失草稿因 sessionStorage 已存）
+  const ensureToken = useCallback(async () => {
+    const valid = loadSavedToken()
+    if (valid) return valid
+    const savedUser = loadUserInfo()
+    if (!savedUser?.email) throw new Error('未登入')
+    sessionStorage.setItem('refreshing', '1')
+    window.location.href = buildAuthUrl({ prompt: 'none', login_hint: savedUser.email })
+    return new Promise(() => {}) // 頁面已轉址，此 promise 不會 resolve
+  }, [])
 
   const login = useCallback(() => {
     window.location.href = buildAuthUrl({ prompt: 'select_account' })
@@ -150,7 +183,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ token, user, login, logout, reauth, authError }}>
+    <AuthContext.Provider value={{ token, user, login, logout, reauth, authError, ensureToken, justRefreshed }}>
       {children}
     </AuthContext.Provider>
   )
